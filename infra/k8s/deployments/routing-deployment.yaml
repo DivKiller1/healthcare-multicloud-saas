@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-deployment
+  name: routing-deployment
   namespace: backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth
+      app: routing
   template:
     metadata:
       labels:
-        app: auth
+        app: routing
     spec:
       containers:
-      - name: auth
-        image: auth-service:2.0
+      - name: routing
+        image: routing-service:3.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000

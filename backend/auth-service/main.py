@@ -1,15 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uuid
+import jwt
+import datetime
+
+SECRET = "supersecretkey"
+ALGORITHM = "HS256"
 
 app = FastAPI(title="Auth Service")
 
 class LoginRequest(BaseModel):
     mobile_number: str
-
-class VerifyRequest(BaseModel):
-    mobile_number: str
-    otp: str
 
 @app.get("/health")
 def health():
@@ -17,16 +17,23 @@ def health():
 
 @app.post("/auth/login")
 def login(req: LoginRequest):
-    return {
-        "message": "OTP sent (mock)",
-        "request_id": str(uuid.uuid4())
+    payload = {
+        "mobile": req.mobile_number,
+        "role": "citizen",
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
     }
 
-@app.post("/auth/verify-otp")
-def verify(req: VerifyRequest):
-    token = str(uuid.uuid4())
+    token = jwt.encode(payload, SECRET, algorithm=ALGORITHM)
+
     return {
         "message": "Login successful",
-        "token": token,
-        "role": "citizen"
+        "token": token
     }
+
+@app.post("/auth/verify")
+def verify(token: str):
+    try:
+        decoded = jwt.decode(token, SECRET, algorithms=[ALGORITHM])
+        return decoded
+    except:
+        raise HTTPException(status_code=401, detail="Invalid token")

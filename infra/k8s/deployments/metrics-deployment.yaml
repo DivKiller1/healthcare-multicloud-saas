@@ -1,21 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-deployment
+  name: metrics-deployment
   namespace: backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth
+      app: metrics
   template:
     metadata:
       labels:
-        app: auth
+        app: metrics
     spec:
       containers:
-      - name: auth
-        image: auth-service:2.0
+      - name: metrics
+        image: metrics-service:1.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
+        envFrom:
+        - secretRef:
+            name: postgres-secret
+        env:
+        - name: DB_HOST
+          value: postgres
